@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 
 class Game():
@@ -40,10 +41,14 @@ class Game():
             self.player_move()
 
     def ai_move(self):
-        row, col = self.minimax(self.board, True)['pos']
+        if self.moves_left() == 9:
+            best_start_moves = [(0, 0), (0, 2), (2, 0), (2, 2)]
+            row, col = random.choice(best_start_moves)
+        else:
+            row, col = self.minimax(self.board, np.inf, -np.inf, True)['pos']
         self.board[row][col] = self.ai
 
-    def minimax(self, board, move_max):
+    def minimax(self, board, alpha, beta, move_max):
         if self.check_winner(self.player):
             return {"pos": None, "score": -1 * (self.moves_left() + 1)}
         if self.check_winner(self.ai):
@@ -57,10 +62,13 @@ class Game():
                 for col in range(3):
                     if board[row][col] == ' ':
                         board[row][col] = self.ai
-                        current = self.minimax(board, not move_max)
+                        current = self.minimax(board, alpha, beta, not move_max)
                         if current['score'] > best['score']:
                             best = {"pos": (row, col), "score": current["score"]}
                         board[row][col] = ' '
+                        alpha = max(best['score'], beta)
+                        if beta <= alpha:
+                            continue
         
         else:
             best = {"pos": None, "score": np.inf}
@@ -68,19 +76,20 @@ class Game():
                 for col in range(3):
                     if board[row][col] == ' ':
                         board[row][col] = self.player
-                        current = self.minimax(board, not move_max)
+                        current = self.minimax(board, alpha, beta, not move_max)
                         if current['score'] < best['score']:
                             best = {"pos": (row, col), "score": current["score"]}
                         board[row][col] = ' '
+                        beta = min(best['score'], beta)
+                        if beta <= alpha:
+                            continue
         
         return best
 
     def check_winner(self, mark):
-        # Check rows
         for row in self.board:
             if row.count(mark) == 3:
                 return True
-        # Check columns
         for col in range(3):
             if [self.board[row][col] for row in range(3)].count(mark) == 3:
                 return True
