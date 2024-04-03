@@ -39,14 +39,18 @@ class Game():
         else:
             print("Invalid move")
             self.player_move()
+        self.show_board()
 
     def ai_move(self):
+        print("AI's move:", end=' ')
         if self.moves_left() == 9:
             best_start_moves = [(0, 0), (0, 2), (2, 0), (2, 2)]
             row, col = random.choice(best_start_moves)
         else:
             row, col = self.minimax(self.board, np.inf, -np.inf, True)['pos']
         self.board[row][col] = self.ai
+        print(f"{row} {col}")
+        self.show_board()
 
     def minimax(self, board, alpha, beta, move_max):
         if self.check_winner(self.player):
@@ -87,9 +91,11 @@ class Game():
         return best
 
     def check_winner(self, mark):
+        # Check rows
         for row in self.board:
             if row.count(mark) == 3:
                 return True
+        # Check columns
         for col in range(3):
             if [self.board[row][col] for row in range(3)].count(mark) == 3:
                 return True
@@ -114,13 +120,11 @@ class Game():
                     print("It's a draw!")
                     break
                 self.ai_move()
-                self.show_board()
                 if self.check_winner(self.ai):
                     print("You lose!")
                     break
             else:
                 self.ai_move()
-                self.show_board()
                 if self.check_winner(self.ai):
                     print("You lose!")
                     break
