@@ -1,10 +1,14 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import random
+import time
 
 
 class Game():
-    def __init__(self):
+    def __init__(self, algorithm='minimax'):
+        self.algorithm = algorithm
         self.board = [[' ' for _ in range(3)] for _ in range(3)]
+        self.times = []
 
     def show_board(self):
         for ix, row in enumerate(self.board):
@@ -47,12 +51,39 @@ class Game():
             best_start_moves = [(0, 0), (0, 2), (2, 0), (2, 2)]
             row, col = random.choice(best_start_moves)
         else:
-            row, col = self.minimax(self.board, np.inf, -np.inf, True)['pos']
+            match self.algorithm:
+                case 'minimax':
+                    start_time = time.perf_counter()
+                    row, col = self.minimax(self.board, True)['pos']
+                    end_time = time.perf_counter()
+                case 'alpha-beta':
+                    start_time = time.perf_counter()
+                    row, col = self.alpha_beta(self.board, -np.inf, np.inf, True)['pos']
+                    end_time = time.perf_counter()
+            duration = end_time - start_time
+            self.times.append(duration)
+            print(f"Time: {duration:.2f}s")
         self.board[row][col] = self.ai
         print(f"{row} {col}")
         self.show_board()
 
-    def minimax(self, board, alpha, beta, move_max):
+    def plot_times(self):
+        x = range(1, len(self.times) + 1)
+        plt.bar(x, self.times)
+        plt.xlabel('State Number')
+        plt.ylabel('Time (s)')
+        plt.xticks(x)  # Set x-axis ticks to integers
+        plt.yscale('log')  # Set y-axis to logarithmic scale
+        match self.algorithm:
+            case 'minimax':
+                plt.title('Minimax')
+            case 'alpha-beta':
+                plt.title('Alpha-Beta')
+        for i, time in enumerate(self.times):
+            plt.text(x[i], time, str(round(time, 6)), ha='center', va='bottom')
+        plt.show()
+
+    def minimax(self, board, move_max):
         if self.check_winner(self.player):
             return {"pos": None, "score": -1 * (self.moves_left() + 1)}
         if self.check_winner(self.ai):
@@ -66,7 +97,39 @@ class Game():
                 for col in range(3):
                     if board[row][col] == ' ':
                         board[row][col] = self.ai
-                        current = self.minimax(board, alpha, beta, not move_max)
+                        current = self.minimax(board, not move_max)
+                        if current['score'] > best['score']:
+                            best = {"pos": (row, col), "score": current["score"]}
+                        board[row][col] = ' '
+        
+        else:
+            best = {"pos": None, "score": np.inf}
+            for row in range(3):
+                for col in range(3):
+                    if board[row][col] == ' ':
+                        board[row][col] = self.player
+                        current = self.minimax(board, not move_max)
+                        if current['score'] < best['score']:
+                            best = {"pos": (row, col), "score": current["score"]}
+                        board[row][col] = ' '
+        
+        return best
+    
+    def alpha_beta(self, board, alpha, beta, move_max):
+        if self.check_winner(self.player):
+            return {"pos": None, "score": -1 * (self.moves_left() + 1)}
+        if self.check_winner(self.ai):
+            return {"pos": None, "score": 1 * (self.moves_left() + 1)}
+        if self.check_draw():
+            return {"pos": None, "score": 0}
+        
+        if move_max:
+            best = {"pos": None, "score": -np.inf}
+            for row in range(3):
+                for col in range(3):
+                    if board[row][col] == ' ':
+                        board[row][col] = self.ai
+                        current = self.alpha_beta(board, alpha, beta, not move_max)
                         if current['score'] > best['score']:
                             best = {"pos": (row, col), "score": current["score"]}
                         board[row][col] = ' '
@@ -80,7 +143,7 @@ class Game():
                 for col in range(3):
                     if board[row][col] == ' ':
                         board[row][col] = self.player
-                        current = self.minimax(board, alpha, beta, not move_max)
+                        current = self.alpha_beta(board, alpha, beta, not move_max)
                         if current['score'] < best['score']:
                             best = {"pos": (row, col), "score": current["score"]}
                         board[row][col] = ' '
@@ -137,6 +200,7 @@ class Game():
                     break
 
     def run(self):
+        self.times = []
         self.chose_side()
         self.show_board()
         print("Rows and columns are indexed from 0 to 2. For example:")

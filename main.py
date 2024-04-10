@@ -2,8 +2,9 @@ from minimax import Game
 
 
 def main():
-    game = Game()
+    game = Game(algorithm='minimax')
     game.run()
+    game.plot_times()
 
 
 if __name__ == "__main__":

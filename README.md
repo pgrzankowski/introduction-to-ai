@@ -20,11 +20,17 @@ W przypadku rozpoczęcia rozgrywki przez komputer wybiera on jeden z narożnikó
 
 ## Analiza Wydajności
 
-Do analizy wydajności algorytmu przeprowadzono serię eksperymentów, mierząc czas potrzebny na podjęcie decyzji przez AI w różnych stanach gry, zarówno z implementacją optymalizacji alfa-beta, jak i bez niej.
+Do analizy wydajności algorytmu przeprowadziłem serię eksperymentów, mierząc czas potrzebny na podjęcie decyzji przez AI w różnych stanach gry, zarówno z implementacją optymalizacji alfa-beta, jak i bez niej. Wziąłem pod uwagę 2 gry, pierwszą rozpoczynałem od lewego górnego rogu, natomiast drugą od prawego dolnego.
 
-![Wykres czasu decyzji](#) - Link do wykresu
+Poniższe wykresy przedstawiają długość wykonania algorytmu minimax (po lewej) i alpha-beta (po prawej), na podstawie aktualnego stanu planszy (im większa wartość stanu tym późniejszy etap gry). \
+**Pierwsza gra**\
+![Wykres minimax 1](/plots/minimax.png) ![Wykres alpha-beta 1](/plots/alpha_beta.png)\
+**Druga gra**\
+![Wykres minimax 2](/plots/minimax2.png) ![Wykres aphta-beta 2](/plots/alpha_beta2.png)
 
-Na wykresie widać, że zastosowanie optymalizacji alfa-beta znacząco redukuje czas potrzebny na podjęcie decyzji przez AI, szczególnie w bardziej skomplikowanych stanach gry, gdzie liczba możliwych ruchów jest większa.
+Analizując przebieg pierwszej gry można zauważyć, że algorytm minimax bez optymalizacji alpha-beta poradził sobię szybciej w każdym możliwym stanie. Natomiast podczas drugiej gry są momenty w których wygrywa ten z implementacją alpha-beta. Warto zastanowić się dlaczego tak się dzieje. W pierwszej grze nie podczas przeszukiwania możliwych stanów, algorytm natkął się na te nadające się do odrzucenia dopiero po przeanalizowaniu gorszych rozwiązań co doprowadziło do nieodrzucenia gorszej ścieżki, tym samym zwiększając ilość wykonanych operacji. Jednak w drugiej grze w niektórych stanach bardziej optymalne rozwiązania zostały znalezione pierwsze powodując odrzucenie gorszych.
+
+Warto też zwrócić uwagę na zwiększenie czasu działania, dla każdego stanu w drugiej grze, w przypadku algorytmu minimax bez optymalizacji alpha-beta. W przypadku algorytmu z optymalizacją można zauważyć poprawę czasową w drugiej grze w niektórych stanach. Oznacza to, że algorytm z optymalizacją alpha-beta pozwala znacząco zredukować czas obliczeń w korzystnym przypadku kolejności rozpatrywanych stanów. 
 
 ## Podsumowanie i Wnioski
 
